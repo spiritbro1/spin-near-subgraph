@@ -1,10 +1,28 @@
-# NEAR Template Subgraph
+# Create a subgraph for ref finance
 
-A NEAR Template Subgraph project to help you get started with The Graph for NEAR. For more information see the docs for [Building Subgraphs on NEAR](https://thegraph.com/docs/supported-networks/near).
+All data is coming from this account :
 
-Customize the following files:
-- subgraph.yaml
-- schema.graphql
-- src/mappings.ts
+```
+ref-finance.near, ref-farming.near, v2.ref-farming.near,v2.ref-finance.near
+```
 
-We've commented the three files to indicate what likely needs changing.
+startBlock coming via public readonly postgresql database of near analytics :
+
+```
+postgres://public_readonly:nearprotocol@104.199.89.51/mainnet_explorer
+```
+
+for `ref-finance.near` the query is :
+
+```
+SELECT last_update_block_height
+	FROM public.accounts where account_id='ref-finance.near';
+```
+
+then you'll get something like this :
+
+| last_update_block_height      | 
+| ----------- | 
+| 32010736      | 
+
+
