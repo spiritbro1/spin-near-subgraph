@@ -8,34 +8,21 @@ testnet: postgres://public_readonly:nearprotocol@35.184.214.98/testnet_explorer
 mainnet: postgres://public_readonly:nearprotocol@104.199.89.51/mainnet_explorer
 
 We gonna use `testnet` one, maybe you wondering why not use sql instead of subgraph? , it's because sql has timeout of 10 sec if im not mistaken and it's not useful for our use case, so that's why we still need subgraph, we also need to create API with sql, with subgraph we can use their graphql API only and that is very neat, instead creating a whole API interface.
-All data is coming from this account :
 
-```
-ref-finance.near, ref-farming.near, v2.ref-farming.near,v2.ref-finance.near
-```
+First, we need to check the first start block of this account `app.spin_trade.testnet` by querying near testnet public indexer, to do that you can run `node scripts/check_first_block.js` or you can use your favorite postgresql client like `pgadmin` for example, the query for that is :
 
-`startBlock` coming via public readonly postgresql database of near analytics :
-
-```
-postgres://public_readonly:nearprotocol@104.199.89.51/mainnet_explorer
-```
-
-For `ref-finance.near` the query is :
-
-```
+```sql
 SELECT last_update_block_height
-	FROM public.accounts where account_id='ref-finance.near';
+	FROM public.accounts where account_id='app.spin_trade.testnet';
 ```
 
-Then you'll get something like this :
+And if you're using my script you will get something like this :
 
-| last_update_block_height      | 
-| ----------- | 
-| 32010736      | 
+```JSON
+[ { last_update_block_height: '78317495' } ]
+```
+Where `78317495` is the first block this account is created if you go to testnet explorer you can see it for yourself that this block is where this account is created https://explorer.testnet.near.org/blocks/92wFfEM8rcXi5Lc2ym5Ls3Nh7yob8rASYdCuH51eFT2H
 
-Let's check on near main explorer is it the right block? go to [https://explorer.mainnet.near.org/blocks/BCEypMTV8icxkPQ9vsaNWp6nNazLhrHUs2cwqsAZER6X](https://explorer.mainnet.near.org/blocks/BCEypMTV8icxkPQ9vsaNWp6nNazLhrHUs2cwqsAZER6X) as you can see that is the block 32010736 and only 1 receipt which is for creating account so that is the right block. For the other `account_id` we need to do the same. So in order we get the starting block for each `account_id` like this :
+![image](https://user-images.githubusercontent.com/62529025/151093256-3ee80b52-d0fb-478e-ab76-a61be86ec9fa.png)
 
-- ref-finance.near #32010736
-- ref-farming.near #43821219
-- v2.ref-finance.near #45752814
-- v2.ref-farming.near #46746777 
+And after we know the start block now we can scaffold our subgraph application first, if you haven't clone it yet, clone this repo https://github.com/spiritbro1/spin-near-subgraph, after that go inside that folder and run `yarn`
